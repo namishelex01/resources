@@ -1,0 +1,66 @@
+~~~~~Port Scanning tool~~~~~
+
+
+| Discovery scans |
+-sP   -   Ping
+-sL   -   List Scan
+-sO   -   Protocol Scan
+-sV   -   Verify
+
+
+| Common attack options |
+ 
+-n              -         Skip DNS resolving
+-sn             -         Disable port scan
+-Pn             -         Skip host discovery
+-PO             -         IP Protocol ping
+-PE             -         ICMP echo
+-PP             -         ICMP timestamp
+-PM             -         ICMP netmask
+-sO             -         IP Protocol ID scan
+-p              -         Ports
+-sV             -         Version scan
+-O              -         OS scan
+-sC             -         Default script scan
+--traceroute    -         Traceroute a path
+-A              -         Aggressive scan, includes version, OS and traceroute
+-sU             -         UDP scan
+-T[0-5]         -         Timing scan, 5 is fastest
+-v              -         Verbose output
+-sA             -         ACK scan ( to see if port is filtered or not )
+-oN/-oX/-oS/-oG -         Normal, XML, Script Kiddie and grepable format, add extension of filename also
+-oA             -         Output in all major scans
+
+
+| Scan switches and behavior  |
+ 
+Option        Description       Win OPEN   Win CLOSED   Linux OPEN   Linux CLOSED
+-sT           Full connect      SA         RA           SA           RA
+-sS           Stealth/half open SA         RA           SA           RA
+-sN           Null              RA         RA           --           RA
+-sX           XMAS              RA         RA           --           RA
+-sF           FIN               RA         RA           --           RA
+
+
+|  NMAP Script Categories |
+
+auth:       This category is for scripts related to user authentication. 
+            Nmap --script auth <IP>
+broadcast:  This is a very interesting category of scripts that use broadcast petitions to gather information.
+brute:      This category is for scripts that help conduct brute-force password auditing.
+default:    This category is for scripts that are executed when a script scan is executed (-sC). 
+            Nmap --script default <IP>
+discovery:  This category is for scripts related to host and service discovery. This category of scripts is ideal when we need to have as much information as possible for a specific target. 
+            Nmap --script discovery <IP>
+dos:        This category is for scripts related to denial of service attacks.
+exploit:    This category is for scripts that exploit security vulnerabilities.
+external:   This category is for scripts that depend on a third-party service. performs an automatic Web Whois to the target and discovers additional information like the geographical location,the name of the organization and the net range. 
+            Nmap --script external scanme.nmap.org
+fuzzer:     This category is for NSE scripts that are focused on fuzzing.
+intrusive:  This category is for scripts that might crash something or generate a lot of network noise. Scripts that system administrators may consider intrusive belong to this category.
+malware:    This category is for scripts related to malware detection.
+safe:       This category is for scripts that are considered safe in all situations. 
+            Nmap --script safe <IP>
+version:    This category is for scripts that are used for advanced versioning.
+vuln:       This category is for scripts related to security vulnerabilities
+

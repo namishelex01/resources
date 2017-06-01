@@ -1,0 +1,108 @@
+IPTABLES: 4 built in tables:
+    i.FILTER table: 
+    	  1.INPUT chain- incoming to the firewall
+    	  2.OUTPUT chain- outgoing from the firewall
+    	  3.FORWARD chain-packets for another NIC on the local server
+    ii.NAT table: 
+    	  1.PREROUTING- alters packets before routing. (used for DNAT , destination nat)
+    	  2.POSTROUTING – alters packets after routing. (used for SNAT , source nat)
+    	  3.OUTPUT – used for packets generated locally
+    iii.MANGLE table: specialized packet alteration. It modifys the QOS bit in the TCP header
+        1.PREROUTING
+        2.OUTPUT
+        3.FORWARD
+        4.INPUT
+        5.POSTROUTING
+    iv.RAW table: configuration exemptions
+    	  1.PREROUTING
+    	  2.OUTPUT
+
+Actions on the Packet:
+      i.    ACCEPT    - Accept the packet
+    	ii.   DROP      - Drop the packet
+    	iii.  QUEUE     - Pass the packet to userspace
+    	iv.   RETURN    - Stop executing the next set of rules in the current chain
+
+Examples:
+
+i.    Flush all present tables : 
+      $ iptables –F
+      
+ii.   List tables present : 
+      $ iptables –L
+      
+iii.  Block I/P by IP address: 
+      $ iptables –A INPUT  –i eth0 –s “10.10.10.7” –j DROP
+      
+iv.   Block O/P by IP address:  
+      $ iptables –A OUTPUT –o eth0 –s “10.10.10.7”  -j DROP
+      [Now try to ping from other machine]
+      
+v.    Allow all incoming SSH (need to set an input and output):  
+      $ iptables –A INPUT  –i eth0 –p tcp --dport 22 –m state --state NEW, ESTABLISHED  -j ACCEPT
+      $ iptables –A OUTPUT -o eth0 -p tcp --sport 22 –m state --state ESTABLISHED       -j ACCEPT   
+
+vi.   Allow SSH incoming from only a specific N/W:  
+      $ iptables –A INPUT  –i eth0   -p tcp  -s  192.168.3.0/24  --dport 22  -m state  --state NEW,ESTABLISHED  -j ACCEPT
+      $ iptables –A OUTPUT –o eth0   -p tcp  --sport 22  -m state  --state ESTABLISHED  -j ACCEPT
+
+vii.  Allow incoming HTTP and HTTPS:  
+      $ iptables –A INPUT  -i  eth0  –p  tcp  --dport 80   –m state  --state NEW,ESTABLISHED  -j ACCEPT
+      $ iptables –A OUTPUT -o  eth0  -p  tcp  --sport 80   -m state  --state ESTABLISHED      -j ACCEPT
+      $ iptables –A INPUT  -i  eth0  –p  tcp  --dport 443  –m state  --state NEW,ESTABLISHED  -j ACCEPT
+      $ iptables –A OUTPUT -o  eth0  -p  tcp  --sport 443  -m state  --state ESTABLISHED      -j ACCEPT
+
+viii. Combine multiple rules :  
+      $ iptables –A INPUT   -i eth0 –p tcp  -m multiport  --dports 22,80,443  -m state  --state NEW,ESTABLISHED  -j ACCEPT
+      $ iptables –A OUTPUT  -o eth0 –p      –m multiport  --sports 22,80,443  -m state  --state ESTABLISHED      -j ACCEPT
+
+ix.   Allow outgoing SSH:  
+      $ iptables –A OUTPUT -o eth0 –p tcp  --dport 22 –m state  --state NEW,ESTABLISHED –j ACCEPT
+      $ iptables –A INPUT  –i eth0 –p tcp  --sport 22 –m state  --state ESTABLISHED     –j ACCEPT
+
+x.    Allow PING from external to internal N/W: 
+      $ iptables –A INPUT  –p ICMP  --icmp-type  echo-request -j ACCEPT
+      $ iptables –A OUTPUT –p ICMP  --icmp-type  echo-reply   -j ACCEPT
+
+xi.   Allow internal to external. On a firewall server there would be one nic connected to external and one to internal. This rule allows internal to talk to external (eth1 is connected to external, eth0 is connected to internal) : 
+      $ iptables –A FORWARD –i eth0  -o eth1  -j ACCEPT
+
+xii.  Allow outbound DNS: 
+      $ iptables –A OUTPUT -p udp -o eth0  --dport 53 –j ACCEPT
+      $ iptables –A INPUT  –p udp –i eth0  --sport 53 –j ACCEPT
+
+xiii. Now to PORT FORWARD that comes to port 422 to port 22: first we allow 422: 
+      $ iptables –A INPUT  –i eth0 –p tcp  --dport 422  -m state   --state NEW,ESTABLISHED  -j ACCEPT  
+      $ iptables –A OUTPUT –o eth0 –p tcp  --sport 422  -m state   --state ESTABLISHED      -j ACCEPT
+      $ iptables -t nat  -A PREROUTING  -p tcp  -d  192.168.2.6  --dport 422  -j  DNAT  --to 192.168.2.6:22
+
+xiv.  Full State of Firewall: 
+      $ iptables –L –n –v  
+
+xv.   Connection limitation - Allow only two TELNET connections per host: 
+      $ iptables –A INPUT  -p  tcp   --syn  --dport 23  -m connlimit  --connlimit-above  2  -j REJECT
+
+xvi.  Default policy of DROP ALL:
+      [FLUSH]
+      $ iptables -P INPUT DROP
+      $ iptables -P FORWARD DROP
+      $ iptables -P OUTPUT DROP
+
+xvii. Setting up a Basic NAT, forward packets from my internal network(ETH1) to the external network (ETH0) and hide it (masquerade) :  
+      $ iptables -t nat -A POSTROUTING  -o  eth0  -j MASQUERADE  
+      $ iptables -A FORWARD -i eth0  -o eth1  -m state --state RELATED,ESTABLISHED -j ACCEPT
+      $ iptables –A FORWARD -i eth1  -o eth0  -j ACCEPT
+
+xviii.Block all traffic except web surfing from the internal network. The internal network is 192.168.2.0/24 : 
+      1. Turn on NAT (masquerading) on ETH0: 
+        $ iptables –t nat –A POSTROUTING -o eth0 –j MASQUERADE
+      2. Set the default policy (-P) of the FORWARD chain: 
+        $ iptables -P  FORWARD  DROP
+      3. Append (-A) the FORWARD chain with a rule to jump (-j)  to accept when traffic is coming from a source address (-s), to a certain protocol (-p) , to a destination port (--dport ) : 
+        $ iptables –A FORWARD  -j  ACCEPT  -s 192.168.2.0/24  -p udp  --dport 53  
+        $ iptables –A FORWARD  -j  ACCEPT  -s 192.168.2.0/24  -p tcp  --dport 80
+      4. Allow traffic to return to the internal N/W (-d) if coming from the allowed source ports: 
+        $ iptables -A  FORWARD  -j ACCEPT  -d 192.168.2.0/24  -p udp  --sport 53
+        $ iptables –A  FORWARD  -j ACCEPT  -d 192.168.2.0/24  -p tcp  --sport 80
+        
+

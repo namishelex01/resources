@@ -64,3 +64,44 @@ safe:       This category is for scripts that are considered safe in all situati
 version:    This category is for scripts that are used for advanced versioning.
 vuln:       This category is for scripts related to security vulnerabilities
 
+
+|  NMAP IDS/IPS Evasion |
+
+Packet Fragmentation: Evade pattern matching detection technique
+                      When Fragmentation reassembly functionality is disabled
+$nmap -f <TargetIP>
+
+Append Random Data:   Spoof the data length of packet
+$nmap --data-length <number-of-bytes> <IP>
+
+Decoy Scan:           Add random hosts either from attacker's subnet or from victim's subnet
+                      In logs, multiple hosts IP makes it difficult to trace the attacker
+                      But first do an Idle scan of available zombie hosts
+$nmap -D <IP1, IP2, IP3,...> <TargetIP>
+$nmap -sI <ZombieIP> <TargetIP>
+$nmap -D RND:25 <TargetIP>               <--Random IP generation-->
+
+Spoof source IP:      Spoof the source IP (from the victim's subnet) so IDS/firewall will pass thinking as a legitimate user
+$nmap -S <SpoofedIP> <TargetIP>
+
+Spoof source port:    Bypass rules that allow requests from few ports (ex. Port 53).
+$nmap --source-port <PortNumber> <IP>
+
+Send Bad Checksum:    Check for configuration of system
+$nmap --badsum <IP>
+
+Spoof MAC Address:    Bypass MAC filtering rule
+$nmap --spoof-mac <DELLorAPPLEorELSE / 0 / SPECIFIC> <IP>
+                          |            |      |
+                  choose vendor      random   specific
+
+Scanning Timing:      Can be used to evade some of the rules in the firewalls or IDS.
+                      Adding random order increases effectiveness of scan
+                      T0 = Paranoid (Waits 5 minutes between sending each probes, not detected by IDS/IPS)
+                      T1 = Sneaky (waits 15 seconds)
+                      T2 = Polite
+                      T3 = Normal
+                      T4 = Aggressive
+                      T5 = Insane (easily detectable)
+$nmap --randomize-hosts -T<0-5> <TargetIP>
+

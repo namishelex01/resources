@@ -2,44 +2,46 @@
 
 
 | Discovery scans |
--sP   -   Ping
--sL   -   List Scan
--sO   -   Protocol Scan
--sV   -   Verify
-
-
-| Common attack options |
- 
--n              -         Skip DNS resolving
--sn             -         Disable port scan
--Pn             -         Skip host discovery
--PO             -         IP Protocol ping
--PE             -         ICMP echo
--PP             -         ICMP timestamp
--PM             -         ICMP netmask
--sO             -         IP Protocol ID scan
--p              -         Ports
--sV             -         Version scan
--O              -         OS scan
--sC             -         Default script scan
---traceroute    -         Traceroute a path
--A              -         Aggressive scan, includes version, OS and traceroute
--sU             -         UDP scan
--T[0-5]         -         Timing scan, 5 is fastest
--v              -         Verbose output
--sA             -         ACK scan ( to see if port is filtered or not )
--oN/-oX/-oS/-oG -         Normal, XML, Script Kiddie and grepable format, add extension of filename also
--oA             -         Output in all major scans
+-sP   -   Ping           | -sW  -  Window Scan   | 
+-sL   -   List/DNS Scan  | -sA  -  ACK Scan      | 
+-sO   -   Protocol Scan  | -sR  -  RPC Scan      | 
+-sV   -   Verify         | -sI  -  Idle Scan     | 
+-sU   -   UDP Scan       | -sV  -  Version Scan  | 
 
 
 | Scan switches and behavior  |
- 
+
 Option        Description       Win OPEN   Win CLOSED   Linux OPEN   Linux CLOSED
 -sT           Full connect      SA         RA           SA           RA
 -sS           Stealth/half open SA         RA           SA           RA
 -sN           Null              RA         RA           --           RA
 -sX           XMAS              RA         RA           --           RA
 -sF           FIN               RA         RA           --           RA
+
+| Common attack options |
+ 
+-PO             -         IP Protocol ping    -|
+-PE             -         ICMP echo            |
+-PP             -         ICMP timestamp       |
+-PM             -         ICMP netmask         |- PING DETECTION
+-PS             -         SYN Ping             |
+-PI             -         ICMP Ping            |
+-PB             -         TCP+ICMP Ping       -|
+-p              -         Ports
+-O              -         OS scan
+-n              -         Skip DNS resolving
+-sn             -         Disable port scan
+-Pn             -         Skip host discovery
+-sC             -         Default script scan
+--traceroute    -         Traceroute a path
+-A              -         Aggressive scan, includes version, OS and traceroute
+-T[0-5]         -         Timing scan, 5 is fastest
+-v              -         Verbose output
+
+
+| Output Format |
+-oN/-oX/-oS/-oG -         Normal, XML, Script Kiddie and grepable format
+-oA             -         Output in all major scans
 
 
 |  NMAP Script Categories |
@@ -99,9 +101,9 @@ Scanning Timing:      Can be used to evade some of the rules in the firewalls or
                       Adding random order increases effectiveness of scan
                       T0 = Paranoid (Waits 5 minutes between sending each probes, not detected by IDS/IPS)
                       T1 = Sneaky (waits 15 seconds)
-                      T2 = Polite
+                      T2 = Polite (waits 0.4 seconds)
                       T3 = Normal
-                      T4 = Aggressive
-                      T5 = Insane (easily detectable)
+                      T4 = Aggressive (parallel scan & 300 seconds timeout)
+                      T5 = Insane (parallel scan & 75 seconds timeout)
 $nmap --randomize-hosts -T<0-5> <TargetIP>
 
